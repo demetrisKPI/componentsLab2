@@ -7,6 +7,7 @@ namespace XUnitTestProject1
     {
         private static string _newsalt = "here goes the salt";
         private static string _password = "here goes the password";
+        private static string _PaSsWoRd = "HeRe GoEs ThE PaSsWoRd";
         private static string _password2 = "this is another password";
         private static uint _modAdler32 = 65521;
 
@@ -16,9 +17,39 @@ namespace XUnitTestProject1
             Assert.NotNull(PasswordHasher.GetHash(_password));
         }
         [Fact]
-        private void TestPasswordSaltRelation()
+        private void TestSpecialSymbols()
+        {
+            string _symbols = "!@#$%^&*()_+-=,./;'[]|}{:";
+            Assert.NotNull(PasswordHasher.GetHash(_symbols, _symbols));
+        }
+        [Fact]
+        private void TestCaseSensitive()
+        {
+            Assert.NotEqual(PasswordHasher.GetHash(_password), PasswordHasher.GetHash(_PaSsWoRd));
+        }
+        [Fact]
+        private void TestPasswordLength()
+        {
+            string _long = "text";
+
+            for (int i = 0; i < 10000; i++)_long += "text";
+
+            Assert.NotNull(PasswordHasher.GetHash(_long));
+        }        
+        [Fact]
+        private void TestStringEmpty()
+        {
+            Assert.NotNull(PasswordHasher.GetHash(string.Empty, string.Empty));
+        }
+        [Fact]
+        private void TestPasswordSaltRelationDefaultSalt()
         {
             Assert.Equal(PasswordHasher.GetHash(_password), PasswordHasher.GetHash(_password));
+        }
+        [Fact]
+        private void TestPasswordSaltRelationCustomSalt()
+        {
+            Assert.Equal(PasswordHasher.GetHash(_password, _newsalt), PasswordHasher.GetHash(_password, _newsalt));
         }
         [Fact]
         private void TestHashDifference()
@@ -37,7 +68,7 @@ namespace XUnitTestProject1
         private void TestNewSaltWithoutInit()
         {
             string withOldSalt = PasswordHasher.GetHash(_password);
-            string withNewSalt = PasswordHasher.GetHash(_password, _newsalt);
+            string withNewSalt = PasswordHasher.GetHash(_password, "another salt");
             Assert.NotEqual(withOldSalt, withNewSalt);
         }
         [Fact]
@@ -47,6 +78,16 @@ namespace XUnitTestProject1
             PasswordHasher.Init(_newsalt, _modAdler32);
             string withInit = PasswordHasher.GetHash(_password);
             Assert.Equal(withoutInit, withInit);
+        }
+        [Fact]
+        private void TestAdlerInt()
+        {
+            Assert.NotEqual(PasswordHasher.GetHash(_password, _newsalt), PasswordHasher.GetHash(_password, _newsalt, (uint)1));
+        }
+        [Fact]
+        private void TestAdlerUint()
+        {
+            Assert.Equal(PasswordHasher.GetHash(_password, _newsalt), PasswordHasher.GetHash(_password, _newsalt, 1234567890));
         }
     }
 }
