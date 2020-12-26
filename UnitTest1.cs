@@ -9,6 +9,7 @@ namespace XUnitTestProject1
         private static string _password = "here goes the password";
         private static string _password2 = "this is another password";
         private static uint _modAdler32 = 65521;
+
         [Fact]
         private void TestGetHash()
         {
@@ -31,6 +32,21 @@ namespace XUnitTestProject1
             PasswordHasher.Init(_newsalt, _modAdler32);
             string withNewSalt = PasswordHasher.GetHash(_password);
             Assert.NotEqual(withOldSalt, withNewSalt);
+        }
+        [Fact]
+        private void TestNewSaltWithoutInit()
+        {
+            string withOldSalt = PasswordHasher.GetHash(_password);
+            string withNewSalt = PasswordHasher.GetHash(_password, _newsalt);
+            Assert.NotEqual(withOldSalt, withNewSalt);
+        }
+        [Fact]
+        private void TestSaltEquivalenceUsingInit()
+        {
+            string withoutInit = PasswordHasher.GetHash(_password, _newsalt);
+            PasswordHasher.Init(_newsalt, _modAdler32);
+            string withInit = PasswordHasher.GetHash(_password);
+            Assert.Equal(withoutInit, withInit);
         }
     }
 }
